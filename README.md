@@ -1,0 +1,2 @@
+On Development mode
+# NotexBeta
