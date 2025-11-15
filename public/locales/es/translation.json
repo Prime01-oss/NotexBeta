@@ -1,0 +1,13 @@
+{
+  "settings": {
+    "title": "Configuración Global",
+    "theme": "Tema de la Aplicación",
+    "font": "Estilo de Fuente del Cuaderno",
+    "language": "Idioma de la Interfaz",
+    "country": "País / Región (para Zona Horaria)"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Oscuro"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "settings": {
+    "title": "वैश्विक सेंटिंग्स",
+    "theme": "एप्लीकेशन थीम",
+    "font": "नोटबुक फ़ॉन्ट स्टाइल",
+    "language": "इंटरफ़ेस भाषा",
+    "country": "देश / क्षेत्र (समय क्षेत्र के लिए)"
+  },
+  "theme": {
+    "light": "लाइट",
+    "dark": "डार्क"
+  },
+  "navbar": {
+    "files": "फाइलें",
+    "draw": "ड्राइंग स्पेस",
+    "search": "खोजें",
+    "settings": "सेटिंग्स",
+    "profile": "प्रोफाइल"
+  },
+  "sidebar": {
+    "newNote": "नया नोट",
+    "newFolder": "नया फ़ोल्डर",
+    "rename": "नाम बदलें",
+    "delete": "हटाएं",
+    "deleteSelected": "चयनित हटाएं",
+    "confirmDeleteTitle": "हटाने की पुष्टि करें",
+    "confirmDeleteMessage": "क्या आप वाकई \"{{itemTitle}}\" को हटाना चाहते हैं?",
+    "confirmDeleteFolderMessage": "क्या आप वाकई फ़ोल्डर \"{{itemTitle}}\" और उसकी सभी सामग्री को हटाना चाहते हैं?",
+    "confirmDeleteMultiple": "क्या आप वाकई {{count}} आइटम हटाना चाहते हैं? यह पूर्ववत नहीं किया जा सकता।"
+  },
+  "editor": {
+    "placeholder": "अपना नोट लिखना शुरू करें...",
+    "save": "सहेजें",
+    "delete": "नोट हटाएं",
+    "deleteDisabled": "हटाने के लिए कोई नोट नहीं चुना गया है"
+  },
+  "profile": {
+    "title": "मेरी प्रोफ़ाइल",
+    "name": "समर",
+    "status": "कंप्यूटर विज्ञान छात्र",
+    "signOut": "साइन आउट"
+  },
+  "draw": {
+    "title": "ड्राइंग स्पेस",
+    "beta": "(बीटा)"
+  }
+}

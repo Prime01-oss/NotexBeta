@@ -1,0 +1,47 @@
+{
+  "settings": {
+    "title": "Global Settings",
+    "theme": "Application Theme",
+    "font": "Notebook Font Style",
+    "language": "Interface Language",
+    "country": "Country / Region (for Timezone)"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "navbar": {
+    "files": "Files",
+    "draw": "Drawing Space",
+    "search": "Search",
+    "settings": "Settings",
+    "profile": "Profile"
+  },
+  "sidebar": {
+    "newNote": "New Note",
+    "newFolder": "New Folder",
+    "rename": "Rename",
+    "delete": "Delete",
+    "deleteSelected": "Delete Selected",
+    "confirmDeleteTitle": "Confirm Deletion",
+    "confirmDeleteMessage": "Are you sure you want to delete \"{{itemTitle}}\"?",
+    "confirmDeleteFolderMessage": "Are you sure you want to delete the folder \"{{itemTitle}}\" and all its contents?",
+    "confirmDeleteMultiple": "Are you sure you want to delete {{count}} items? This cannot be undone."
+  },
+  "editor": {
+    "placeholder": "Start typing your note...",
+    "save": "Save",
+    "delete": "Delete Note",
+    "deleteDisabled": "No note selected to delete"
+  },
+  "profile": {
+    "title": "My Profile",
+    "name": "Samar",
+    "status": "Computer Science Student",
+    "signOut": "Sign Out"
+  },
+  "draw": {
+    "title": "Drawing Space",
+    "beta": "(Beta)"
+  }
+}

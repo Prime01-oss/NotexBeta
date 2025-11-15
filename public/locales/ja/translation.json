@@ -1,0 +1,47 @@
+{
+  "settings": {
+    "title": "グローバル設定",
+    "theme": "アプリケーションのテーマ",
+    "font": "ノートのフォントスタイル",
+    "language": "インターフェース言語",
+    "country": "国/地域 (タイムゾーン)"
+  },
+  "theme": {
+    "light": "ライト",
+    "dark": "ダーク"
+  },
+  "navbar": {
+    "files": "ファイル",
+    "draw": "お絵かきスペース",
+    "search": "検索",
+    "settings": "設定",
+    "profile": "プロフィール"
+  },
+  "sidebar": {
+    "newNote": "新規ノート",
+    "newFolder": "新規フォルダ",
+    "rename": "名前を変更",
+    "delete": "削除",
+    "deleteSelected": "選択を削除",
+    "confirmDeleteTitle": "削除の確認",
+    "confirmDeleteMessage": "本当に \"{{itemTitle}}\" を削除しますか？",
+    "confirmDeleteFolderMessage": "本当にフォルダ \"{{itemTitle}}\" とその内容すべてを削除しますか？",
+    "confirmDeleteMultiple": "{{count}} 個のアイテムを本当に削除しますか？この操作は元に戻せません。"
+  },
+  "editor": {
+    "placeholder": "ノートを書き始める...",
+    "save": "保存",
+    "delete": "ノートを削除",
+    "deleteDisabled": "削除するノートが選択されていません"
+  },
+  "profile": {
+    "title": "マイプロフィール",
+    "name": "サマル",
+    "status": "コンピューターサイエンス専攻",
+    "signOut": "サインアウト"
+  },
+  "draw": {
+    "title": "お絵かきスペース",
+    "beta": "(ベータ)"
+  }
+}

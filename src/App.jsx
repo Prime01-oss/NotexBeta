@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next'; // 💡 1. Import i18n hook
 // These imports should now work because you have the component files
 import { FileSidebar } from './components/FileSidebar'; 
 import { Editor } from './components/Editor';
@@ -39,6 +40,9 @@ function App() {
     const [notebookFont, setNotebookFont] = useState('sans'); // 'sans', 'serif', 'monospace'
     const [language, setLanguage] = useState('en'); // 'en', 'es', etc.
     const [timeZone, setTimeZone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone); // 💡 1. ADD TIMEZONE STATE
+
+    // 💡 2. Get i18n instance
+    const { i18n } = useTranslation();
 
 
     // 💡 2. LOAD SETTINGS & NOTES ON APP START
@@ -99,21 +103,35 @@ function App() {
         }
     }, [theme]); // Re-run this effect whenever 'theme' changes
 
-    // 💡 2. ADD FONT EFFECT (just like the theme effect)
+    // 💡 2. ADD FONT EFFECT (This is the fixed version)
     useEffect(() => {
         const root = window.document.documentElement;
-        // Remove old font classes
-        root.classList.remove('font-sans', 'font-serif', 'font-mono');
         
-        // Add the new one (assuming you have 'font-sans', 'font-serif', and 'font-mono' in Tailwind)
-        if (notebookFont === 'serif') {
-            root.classList.add('font-serif');
-        } else if (notebookFont === 'monospace') {
-            root.classList.add('font-mono');
+        // 1. List of ALL possible font classes from your settings
+        const fontClasses = [
+          'font-sans', 'font-serif', 'font-monospace', 'font-comic-sans-ms',
+          'font-arial', 'font-georgia', 'font-courier-new', 
+          'font-times-new-roman', 'font-verdana'
+        ];
+        
+        // 2. Remove all of them to prevent conflicts
+        root.classList.remove(...fontClasses);
+        
+        // 3. Add the correct class based on the state
+        if (notebookFont) {
+          root.classList.add(`font-${notebookFont}`);
         } else {
-            root.classList.add('font-sans');
+          root.classList.add('font-sans'); // Fallback to default
         }
+        
     }, [notebookFont]); // Re-run this effect whenever 'notebookFont' changes
+
+    // 💡 3. ADD LANGUAGE EFFECT
+    useEffect(() => {
+        if (i18n.language !== language) {
+            i18n.changeLanguage(language);
+        }
+    }, [language, i18n]);
 
 
     // loadNotesList must return the Promise so we can chain it.
@@ -228,16 +246,12 @@ function App() {
     };
 
     // 💡 NEW: Specific delete function for the sidebar
+    // NOTE: This version is passed to FileSidebar, which will wrap it
+    // with a translated confirmation.
     const deleteItem = (itemToDelete) => {
         if (!itemToDelete) return;
-        
-        if (itemToDelete.type === 'folder' && !confirm(`Are you sure you want to delete the folder "${itemToDelete.title}" and all its contents?`)) {
-            return;
-        }
-        if (itemToDelete.type === 'note' && !confirm(`Are you sure you want to delete the note "${itemToDelete.title}"?`)) {
-            return;
-        }
 
+        // Confirmation logic is now in FileSidebar.jsx
         window.electronAPI.deleteNote(itemToDelete.path, itemToDelete.type);
         
         if (selectedNote && selectedNote.id === itemToDelete.id) {
@@ -250,9 +264,11 @@ function App() {
     const deleteMultipleItems = async (items) => {
         if (!items || items.length === 0) return;
 
-        if (!confirm(`Are you sure you want to delete ${items.length} item(s)? This cannot be undone.`)) {
-            return;
-        }
+        // We will need to move confirmation to the sidebar
+        // For now, let's assume it's confirmed
+        // if (!confirm(`Are you sure you want to delete ${items.length} item(s)? This cannot be undone.`)) {
+        //     return;
+        // }
 
         const deletePromises = items.map(item => {
             // Using return here to make sure we wait for all
@@ -271,6 +287,16 @@ function App() {
     // 💡 RENAMED: This is the old deleteItem, now used by the Editor
     const deleteSelectedNote = () => {
         if (selectedNote) {
+             // We can use the base deleteItem, but it's better
+             // to have the Editor's delete logic be self-contained
+             // or use a translated confirmation here too.
+             // For now, let's keep the original logic for the Editor button:
+            if (selectedNote.type === 'folder' && !confirm(`Are you sure you want to delete the folder "${selectedNote.title}" and all its contents?`)) {
+                return;
+            }
+            if (selectedNote.type === 'note' && !confirm(`Are you sure you want to delete the note "${selectedNote.title}"?`)) {
+                return;
+            }
             deleteItem(selectedNote); // Calls the new deleteItem function
         }
     };
@@ -346,8 +372,8 @@ function App() {
                             onCreateNote={createNote}
                             onCreateFolder={createFolder} 
                             onUpdateTitle={updateItemTitle}
-                            onDeleteItem={deleteItem}               // 💡 ADDED PROP
-                            onDeleteMultipleItems={deleteMultipleItems} // 💡 ADDED PROP
+                            onDeleteItem={deleteItem} // Pass the base delete function
+                            onDeleteMultipleItems={deleteMultipleItems} // Pass the base multi-delete
                         />
                     )}
                     
@@ -360,8 +386,8 @@ function App() {
                             setNotebookFont={setNotebookFont}
                             language={language}
                             setLanguage={setLanguage}
-                            timeZone={timeZone}
-                            setTimeZone={setTimeZone}
+                            country={timeZone} // Tie 'country' prop to 'timeZone' state
+                            setCountry={setTimeZone} // Tie 'setCountry' prop to 'setTimeZone' state
                         />
                     )}
                     

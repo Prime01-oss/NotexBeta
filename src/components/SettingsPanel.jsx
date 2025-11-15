@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next"; // 💡 1. Import hook
 
 const sunIcon = (
   <svg
@@ -45,9 +46,12 @@ export function SettingsPanel({
   setNotebookFont,
   language,
   setLanguage,
-  country,
-  setCountry,
+  country, // This is tied to timeZone in App.jsx
+  setCountry, // This is tied to setTimeZone in App.jsx
 }) {
+  // 💡 2. Get the 't' (translate) function
+  const { t } = useTranslation();
+
   const fontOptions = [
     { label: "System Sans-Serif", value: "sans" },
     { label: "Serif (Classic)", value: "serif" },
@@ -100,14 +104,16 @@ export function SettingsPanel({
 
   return (
     <div className="w-full h-full p-8 flex flex-col bg-gradient-to-br from-white/70 to-gray-100/60 dark:from-zinc-900/80 dark:to-zinc-950/80 backdrop-blur-xl border-r border-gray-300/30 dark:border-zinc-700/50 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300">
+      
+      {/* 💡 3. Use the 't' function */}
       <h2 className="text-3xl font-extrabold mb-10 text-gray-900 dark:text-gray-50 tracking-tight">
-        Global Settings
+        {t('settings.title')}
       </h2>
 
       {/* Theme Toggle */}
       <div className="mb-10">
         <label className="block text-base font-semibold mb-3 text-gray-700 dark:text-gray-300">
-          Application Theme
+          {t('settings.theme')}
         </label>
         <div className="relative w-full h-11 p-1 rounded-2xl bg-gray-200/70 dark:bg-zinc-800/70 shadow-inner backdrop-blur-sm overflow-hidden border border-gray-300/40 dark:border-zinc-700/50">
           <div
@@ -126,7 +132,7 @@ export function SettingsPanel({
               }`}
             >
               {sunIcon}
-              <span>Light</span>
+              <span>{t('theme.light')}</span>
             </button>
             <button
               onClick={() => setTheme("dark")}
@@ -137,7 +143,7 @@ export function SettingsPanel({
               }`}
             >
               {moonIcon}
-              <span>Dark</span>
+              <span>{t('theme.dark')}</span>
             </button>
           </div>
         </div>
@@ -146,7 +152,7 @@ export function SettingsPanel({
       {/* Font */}
       <div className="mb-10">
         <label className="block text-base font-semibold mb-3 text-gray-700 dark:text-gray-300">
-          Notebook Font Style
+          {t('settings.font')}
         </label>
         <select
           value={notebookFont}
@@ -164,7 +170,7 @@ export function SettingsPanel({
       {/* Language */}
       <div className="mb-10">
         <label className="block text-base font-semibold mb-3 text-gray-700 dark:text-gray-300">
-          Interface Language
+          {t('settings.language')}
         </label>
         <select
           value={language}
@@ -182,7 +188,7 @@ export function SettingsPanel({
       {/* 🌍 Country / Region */}
       <div className="mb-12">
         <label className="block text-base font-semibold mb-3 text-gray-700 dark:text-gray-300">
-          Country / Region (for Timezone)
+          {t('settings.country')}
         </label>
         <select
           value={country}
