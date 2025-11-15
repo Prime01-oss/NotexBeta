@@ -7,6 +7,31 @@ const crypto = require('node:crypto');
 const userDataPath = app.getPath('userData');
 const notesDir = path.join(userDataPath, 'Notes');
 const remindersFilePath = path.join(userDataPath, 'reminders.json');
+const settingsFilePath = path.join(userDataPath, 'settings.json'); // 💡 ADD THIS
+
+ipcMain.handle('load-settings', async () => {
+    try {
+        const data = await fs.readFile(settingsFilePath, 'utf8');
+        return JSON.parse(data);
+    } catch (err) {
+        // If file doesn't exist or is corrupt, return defaults
+        return {
+            theme: 'dark',
+            notebookFont: 'sans',
+            language: 'en',
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        };
+    }
+});
+
+// 💡 ADD THIS HANDLER TO SAVE SETTINGS
+ipcMain.on('save-settings', async (event, settings) => {
+    try {
+        await fs.writeFile(settingsFilePath, JSON.stringify(settings, null, 2));
+    } catch (err) {
+        console.error('Failed to save settings:', err);
+    }
+});
 
 // --- Helper functions (Unchanged) ---
 async function ensureNotesDirExists() {

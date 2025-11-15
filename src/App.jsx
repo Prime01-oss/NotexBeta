@@ -6,7 +6,7 @@ import { WindowControls } from './components/WindowControl';
 import { NavigationBar } from './components/NavigationBar';
 import { SettingsPanel } from './components/SettingsPanel';
 import { ProfilePanel } from './components/ProfilePanel';
-import { DrawingSpace } from './components/DrawingSpace'; // 💡 1. IMPORT DRAWING SPACE
+import { DrawingSpace } from './components/DrawingSpace';
 
 
 // Helper function to find a node by its ID in the nested notes array
@@ -30,17 +30,52 @@ function App() {
     const [selectedNote, setSelectedNote] = useState(null); 
     const [currentNoteContent, setCurrentNoteContent] = useState('');
     
+    // 💡 1. ADD A LOADING STATE
+    const [isSettingsLoading, setIsSettingsLoading] = useState(true);
+
     // NEW GLOBAL STATE FOR UI
     const [activePanel, setActivePanel] = useState(null); // 'files', 'search', 'settings', or 'profile' (added profile)
     const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
     const [notebookFont, setNotebookFont] = useState('sans'); // 'sans', 'serif', 'monospace'
     const [language, setLanguage] = useState('en'); // 'en', 'es', etc.
+    const [timeZone, setTimeZone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone); // 💡 1. ADD TIMEZONE STATE
 
 
-    // 1. Load the tree structure on app start
+    // 💡 2. LOAD SETTINGS & NOTES ON APP START
     useEffect(() => {
+        // Load settings first
+        window.electronAPI.loadSettings().then(loaded => {
+            setTheme(loaded.theme || 'dark');
+            setNotebookFont(loaded.notebookFont || 'sans');
+            setLanguage(loaded.language || 'en');
+            setTimeZone(loaded.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone);
+        }).finally(() => {
+            setIsSettingsLoading(false);
+        });
+
+        // Load notes list (as before)
         loadNotesList();
     }, []);
+
+    // 💡 3. SAVE SETTINGS WHENEVER THEY CHANGE
+    useEffect(() => {
+        // Don't save while settings are still being loaded
+        if (isSettingsLoading) {
+            return;
+        }
+
+        const settingsToSave = {
+            theme,
+            notebookFont,
+            language,
+            timeZone
+        };
+        
+        // This is a "fire-and-forget" save
+        window.electronAPI.saveSettings(settingsToSave);
+
+    }, [theme, notebookFont, language, timeZone, isSettingsLoading]); // This hook runs when any setting changes
+
 
     // 2. Load the content of the selected note
     useEffect(() => {
@@ -64,6 +99,23 @@ function App() {
         }
     }, [theme]); // Re-run this effect whenever 'theme' changes
 
+    // 💡 2. ADD FONT EFFECT (just like the theme effect)
+    useEffect(() => {
+        const root = window.document.documentElement;
+        // Remove old font classes
+        root.classList.remove('font-sans', 'font-serif', 'font-mono');
+        
+        // Add the new one (assuming you have 'font-sans', 'font-serif', and 'font-mono' in Tailwind)
+        if (notebookFont === 'serif') {
+            root.classList.add('font-serif');
+        } else if (notebookFont === 'monospace') {
+            root.classList.add('font-mono');
+        } else {
+            root.classList.add('font-sans');
+        }
+    }, [notebookFont]); // Re-run this effect whenever 'notebookFont' changes
+
+
     // loadNotesList must return the Promise so we can chain it.
     const loadNotesList = () => {
         // Fetches the entire nested structure
@@ -80,6 +132,7 @@ function App() {
                     setSelectedNote(null);
                 }
             }
+            return newNotes; // Return new notes for chaining
         });
     };
 
@@ -150,9 +203,9 @@ function App() {
                 if (result && result.success) {
                     
                     // 4. Reload the list, which returns its own promise
-                    return loadNotesList().then(() => {
+                    return loadNotesList().then((newlyLoadedTree) => { // Use the returned tree
                         // After the list is reloaded, select the new note
-                        const newNoteInTree = findNodeById(notes, result.newNode.id);
+                        const newNoteInTree = findNodeById(newlyLoadedTree, result.newNode.id); // Use fresh tree
                         setSelectedNote(newNoteInTree || result.newNode); 
                     });
 
@@ -232,21 +285,28 @@ function App() {
         }
     };
 
+    // 💡 THIS IS THE RENAMING FIX (assumes main/preload are fixed)
     const updateItemTitle = (itemToUpdate, newTitle) => {
         if (!newTitle || itemToUpdate.title === newTitle) return;
         
-        window.electronAPI.updateNoteTitle({ 
+        const updateData = { 
             id: itemToUpdate.id, 
             path: itemToUpdate.path, 
             newTitle, 
             type: itemToUpdate.type 
-        });
+        };
         
-        if (selectedNote && selectedNote.id === itemToUpdate.id) {
-            setSelectedNote(prev => ({ ...prev, title: newTitle }));
-        }
-
-        loadNotesList();
+        window.electronAPI.updateNoteTitle(updateData)
+            .then(() => {
+                if (selectedNote && selectedNote.id === itemToUpdate.id) {
+                    setSelectedNote(prev => ({ ...prev, title: newTitle }));
+                }
+                loadNotesList(); // Reload *after* the promise resolves
+            })
+            .catch(error => {
+                console.error("Failed to update title:", error);
+                loadNotesList(); // Reload on failure too
+            });
     };
 
 
@@ -291,7 +351,7 @@ function App() {
                         />
                     )}
                     
-                    {/* Settings Panel */}
+                    {/* 💡 3. PASS ALL SETTINGS PROPS TO SETTINGS PANEL */}
                     {activePanel === 'settings' && (
                         <SettingsPanel 
                             theme={theme}
@@ -300,6 +360,8 @@ function App() {
                             setNotebookFont={setNotebookFont}
                             language={language}
                             setLanguage={setLanguage}
+                            timeZone={timeZone}
+                            setTimeZone={setTimeZone}
                         />
                     )}
                     
@@ -309,6 +371,7 @@ function App() {
                 {activePanel === 'draw' ? (
                     <DrawingSpace />
                 ) : (
+                    // 💡 4. PASS LANGUAGE AND TIMEZONE TO EDITOR
                     <Editor
                         content={currentNoteContent}
                         onChange={setCurrentNoteContent}
@@ -316,6 +379,8 @@ function App() {
                         onDelete={selectedNote ? deleteSelectedNote : null}
                         isNoteSelected={selectedNote && selectedNote.type === 'note'}
                         selectedNote={selectedNote} 
+                        language={language}
+                        timeZone={timeZone}
                     />
                 )}
             </main>

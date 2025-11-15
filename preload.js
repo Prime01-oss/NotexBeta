@@ -22,5 +22,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // --- Reminders Functions (Unchanged) ---
     loadReminders: () => ipcRenderer.invoke('load-reminders'),
     saveReminders: (reminders) => ipcRenderer.send('save-reminders', reminders),
-    showNotification: (title, desc) => ipcRenderer.send('show-notification', title, desc)
+    showNotification: (title, desc) => ipcRenderer.send('show-notification', title, desc),
+    // 💡 ADD THESE TWO LINES FOR SETTINGS
+    loadSettings: () => ipcRenderer.invoke('load-settings'),
+    saveSettings: (settings) => ipcRenderer.send('save-settings', settings)
 });
