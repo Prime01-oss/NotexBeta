@@ -40,7 +40,8 @@ const icons = {
 };
 
 // --- Toolbar ---
-const MenuBar = ({ editor, onSave, onDelete, isNoteSelected, lastModified, createdAt }) => {
+// 💡 FIX 1: Removed 'lastModified' from the props
+const MenuBar = ({ editor, onSave, onDelete, isNoteSelected, createdAt }) => {
   if (!editor) return null;
 
   const fontOptions = [
@@ -132,15 +133,9 @@ const MenuBar = ({ editor, onSave, onDelete, isNoteSelected, lastModified, creat
                 <span>{createdAt}</span>
               </span>
             )}
-            {lastModified && (
-              <span className="flex items-center gap-1 text-[0.8rem] opacity-60">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <path d="M12 20h9" />
-                  <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z" />
-                </svg>
-                <span>{lastModified}</span>
-              </span>
-            )}
+            
+            {/* 💡 FIX 2: Removed the 'lastModified' timestamp display block */}
+            
           </div>
 
           <div className="flex items-center gap-2">
@@ -168,11 +163,25 @@ const MenuBar = ({ editor, onSave, onDelete, isNoteSelected, lastModified, creat
 
 // --- Editor Component ---
 export function Editor({ content, onChange, onSave, onDelete, isNoteSelected, selectedNote }) {
-  const [lastModified, setLastModified] = useState(null);
-  const [createdAt, setCreatedAt] = useState(selectedNote?.createdAt || null);
+  // 💡 FIX 3: Removed 'lastModified' state
+  const [createdAt, setCreatedAt] = useState(null);
 
+  // 💡 FIX 4: Format the 'createdAt' date string when the note is loaded
   useEffect(() => {
-    setCreatedAt(selectedNote?.createdAt || null);
+    if (selectedNote?.createdAt) {
+      const d = new Date(selectedNote.createdAt);
+      const formattedDate = d.toLocaleString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      });
+      setCreatedAt(formattedDate);
+    } else {
+      setCreatedAt(null); // Clear it if no note is selected
+    }
   }, [selectedNote]);
 
   const editor = useEditor(
@@ -187,18 +196,9 @@ export function Editor({ content, onChange, onSave, onDelete, isNoteSelected, se
       ],
       content: typeof content === 'string' ? content : '',
       editable: isNoteSelected,
+      // 💡 FIX 5: Removed 'setLastModified' from the onUpdate handler
       onUpdate: ({ editor }) => {
         onChange(editor.getHTML());
-        setLastModified(
-          new Date().toLocaleString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-          })
-        );
       },
       editorProps: {
         attributes: {
@@ -229,8 +229,8 @@ export function Editor({ content, onChange, onSave, onDelete, isNoteSelected, se
           onSave={onSave}
           onDelete={onDelete}
           isNoteSelected={isNoteSelected}
-          lastModified={lastModified}
           createdAt={createdAt}
+          // 💡 FIX 6: Removed 'lastModified' prop
         />
       )}
 

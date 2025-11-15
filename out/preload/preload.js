@@ -12,10 +12,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Uses path
   saveNoteContent: (note) => ipcRenderer.send("save-note-content", note),
   // Note object: { id, path, content }
-  updateNoteTitle: (item) => ipcRenderer.send("update-note-title", item),
+  updateNoteTitle: (item) => ipcRenderer.invoke("update-note-title", item),
   // Item object: { id, path, newTitle, type }
-  createNote: (parentPath) => ipcRenderer.invoke("create-note", parentPath),
-  // Added parentPath
+  createNote: (parentPath, noteTitle) => ipcRenderer.invoke("create-note", parentPath, noteTitle),
   deleteNote: (itemPath, type) => ipcRenderer.send("delete-note", itemPath, type),
   // Uses path and type
   // --- NEW Folder Function (FIXED) ---

@@ -6,6 +6,7 @@ import { WindowControls } from './components/WindowControl';
 import { NavigationBar } from './components/NavigationBar';
 import { SettingsPanel } from './components/SettingsPanel';
 import { ProfilePanel } from './components/ProfilePanel';
+import { DrawingSpace } from './components/DrawingSpace'; // 💡 1. IMPORT DRAWING SPACE
 
 
 // Helper function to find a node by its ID in the nested notes array
@@ -304,14 +305,19 @@ function App() {
                     
                 </div>
                 
-                {/* Editor: Takes up remaining space */}
-                <Editor
-                    content={currentNoteContent}
-                    onChange={setCurrentNoteContent}
-                    onSave={saveNote}
-                    onDelete={selectedNote ? deleteSelectedNote : null} // 💡 UPDATED PROP
-                    isNoteSelected={selectedNote && selectedNote.type === 'note'} 
-                />
+                {/* 💡 2. Main Content: Editor OR Drawing Space */}
+                {activePanel === 'draw' ? (
+                    <DrawingSpace />
+                ) : (
+                    <Editor
+                        content={currentNoteContent}
+                        onChange={setCurrentNoteContent}
+                        onSave={saveNote}
+                        onDelete={selectedNote ? deleteSelectedNote : null}
+                        isNoteSelected={selectedNote && selectedNote.type === 'note'}
+                        selectedNote={selectedNote} 
+                    />
+                )}
             </main>
 
             {/* RENDER THE PROFILE PANEL HERE (outside 'main') */}

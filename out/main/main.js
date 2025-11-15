@@ -38,8 +38,10 @@ async function scanNotesDir(currentPath, baseDir) {
           // Keep the UUID as the canonical ID
           title: note.title,
           type: "note",
-          path: relativePath
+          path: relativePath,
           // Relative path for file operations
+          createdAt: note.createdAt || null
+          // 💡 FIX 1: Read the creation time
         });
       } catch (err) {
         console.error(`Error reading note file ${entry.name} at ${relativePath}:`, err);
@@ -137,7 +139,7 @@ function createWindow() {
       console.error(`Error saving note at ${notePath}:`, err);
     }
   });
-  ipcMain.on("update-note-title", async (event, { id, path: oldPath, newTitle, type }) => {
+  ipcMain.handle("update-note-title", async (event, { id, path: oldPath, newTitle, type }) => {
     await ensureNotesDirExists();
     const oldFullPath = path.join(notesDir, oldPath);
     newTitle = newTitle.replace(/[^a-zA-Z0-9\s-_.]/g, "").trim() || "Untitled";
@@ -168,7 +170,9 @@ function createWindow() {
       id: crypto.randomUUID(),
       title: sanitizedTitle,
       // <--- Use the new sanitized title
-      content: ""
+      content: "",
+      createdAt: (/* @__PURE__ */ new Date()).toISOString()
+      // 💡 FIX 2: Save the creation time
     };
     const fileName = `${newNote.id}.json`;
     const filePath = path.join(fullDirPath, fileName);
@@ -183,7 +187,9 @@ function createWindow() {
           id: newNote.id,
           title: newNote.title,
           type: "note",
-          path: relativePath
+          path: relativePath,
+          createdAt: newNote.createdAt
+          // 💡 FIX 3: Return the creation time to the app
         }
       };
     } catch (err) {
@@ -249,14 +255,25 @@ function createWindow() {
   });
 }
 app.on("ready", () => {
+  session.defaultSession.clearCache();
   if (!app.isPackaged) {
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
       callback({
         responseHeaders: {
           ...details.responseHeaders,
-          // RELAXED CSP to allow Tldraw to function in the Renderer process
           "Content-Security-Policy": [
-            "default-src 'self' 'unsafe-eval' blob: data:; script-src 'self' http://localhost:5173 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' blob: data:; img-src 'self' data: blob:;"
+            "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: http://localhost:5173 ws://localhost:5173 https://cdn.tldraw.com https://unpkg.com https://esm.sh; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' blob: data: https://unpkg.com https://esm.sh; font-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; img-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; connect-src 'self' http://localhost:5173 ws://localhost:5173 https://cdn.tldraw.com https://unpkg.com https://esm.sh;"
+          ]
+        }
+      });
+    });
+  } else {
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          "Content-Security-Policy": [
+            "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://cdn.tldraw.com https://unpkg.com https://esm.sh; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' blob: data: https://unpkg.com https://esm.sh; font-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; img-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; connect-src 'self' https://cdn.tldraw.com https://unpkg.com https://esm.sh;"
           ]
         }
       });

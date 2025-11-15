@@ -11,9 +11,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getNotesList: () => ipcRenderer.invoke('get-notes-list'), // Fetches the nested tree
     getNoteContent: (notePath) => ipcRenderer.invoke('get-note-content', notePath), // Uses path
     saveNoteContent: (note) => ipcRenderer.send('save-note-content', note), // Note object: { id, path, content }
-    updateNoteTitle: (item) => ipcRenderer.send('update-note-title', item), // Item object: { id, path, newTitle, type }
-    createNote: (parentPath) => ipcRenderer.invoke('create-note', parentPath), // Added parentPath
-    deleteNote: (itemPath, type) => ipcRenderer.send('delete-note', itemPath, type), // Uses path and type
+    updateNoteTitle: (item) => ipcRenderer.invoke('update-note-title', item), // Item object: { id, path, newTitle, type }
+    createNote: (parentPath, noteTitle) => ipcRenderer.invoke('create-note', parentPath, noteTitle), deleteNote: (itemPath, type) => ipcRenderer.send('delete-note', itemPath, type), // Uses path and type
 
     // --- NEW Folder Function (FIXED) ---
     // 💡 FIX 1: Changed to ipcRenderer.invoke() to enable Promise handling in App.jsx.
