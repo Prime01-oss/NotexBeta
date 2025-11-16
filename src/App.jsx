@@ -155,6 +155,24 @@ function App() {
     };
 
     const handleItemSelect = (item) => {
+        // --- AUTO-SAVE LOGIC ---
+        // Check if a note is currently selected, it's a 'note' (not a folder),
+        // and the new item being selected is *different* from the current one.
+        if (selectedNote && selectedNote.type === 'note' && selectedNote.id !== item?.id) {
+            
+            // This is a "fire-and-forget" save. It uses the *current* note's
+            // info (selectedNote) and the *current* editor content (currentNoteContent)
+            // right before we switch to the new note.
+            window.electronAPI.saveNoteContent({ 
+                id: selectedNote.id, 
+                path: selectedNote.path, 
+                content: currentNoteContent 
+            });
+        }
+        // --- END AUTO-SAVE LOGIC ---
+
+        // Set the new note. This will trigger the useEffect hook to 
+        // load the new note's content.
         setSelectedNote(item);
     };
     
@@ -340,12 +358,38 @@ function App() {
         // Root Div for light/dark mode
         <div className="flex flex-col h-screen relative bg-gray-100 text-gray-900 dark:bg-zinc-900 dark:text-white">
             
-            {/* Header */}
+           {/* Header */}
             <header className="titlebar flex justify-between items-center p-3 pl-4 
                         bg-gray-200/80 border-b border-gray-300/50 
                         dark:bg-zinc-800/80 dark:border-zinc-700/50">
-                <h1 className="text-xl font-extrabold text-blue-600 dark:text-blue-400 tracking-wider">Notex</h1>
-                <WindowControls />
+                
+                {/* Left: App Title (flex-1 ensures equal spacing with right side) */}
+                <div className="flex-1 flex justify-start">
+                    <h1 className="text-xl font-extrabold text-blue-600 dark:text-blue-400 tracking-wider">Notex</h1>
+                </div>
+
+                {/* Center: Active Note Title - Perfect Center & Premium Look */}
+                {/* Center: Active Note Title - Perfect Center & Premium Look with Shaded Background */}
+                <div className="flex-shrink-0 max-w-[50%] text-center truncate 
+                                text-lg tracking-wide 
+                                bg-gray-100 dark:bg-zinc-700/70 
+                                px-4 py-2 rounded-lg shadow-md 
+                                titlebar-drag cursor-default">
+                    {/* Display title with premium styling if a note is selected */}
+                    {selectedNote && selectedNote.type === 'note' 
+                        ? <span className="font-extrabold text-blue-700 dark:text-blue-300">
+                              {selectedNote.title}
+                          </span>
+                        : <span className="text-gray-500 dark:text-gray-400 font-medium">
+                              Welcome to Notex
+                          </span>}
+                
+                </div>
+                
+                {/* Right: Window Controls (flex-1 ensures equal spacing with left side) */}
+                <div className="flex-1 flex justify-end">
+                    <WindowControls />
+                </div>
             </header>
 
             {/* Main Content Area */}

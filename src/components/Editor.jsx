@@ -254,8 +254,10 @@ export function Editor({ content, onChange, onSave, onDelete, isNoteSelected, se
         <div className="text-center px-6">
           <p className="text-xl font-light text-gray-500 dark:text-gray-400 mb-2">
             <span className="inline-flex items-center gap-2 justify-center">
-              {icons.file}
-              <span className="font-semibold">Select a note from Files</span>
+             
+              <span className="font-semibold">Select a note from</span>
+               {icons.file}
+              <span className="font-semibold">Files</span>
             </span>
           </p>
           <p className="text-sm text-gray-400 dark:text-gray-500">or create a new one to begin editing.</p>
@@ -267,7 +269,7 @@ export function Editor({ content, onChange, onSave, onDelete, isNoteSelected, se
   return (
     <div className="flex-1 flex flex-col bg-white dark:bg-zinc-900 relative min-h-[320px]">
       {/* Menu bar */}
-      {editor && <MenuBar editor={editor} onSave={onSave} onDelete={onDelete} isNoteSelected={isNoteSelected} createdAt={createdAt} />}
+      {editor && isNoteSelected && <MenuBar editor={editor} onSave={onSave} onDelete={onDelete} isNoteSelected={isNoteSelected} createdAt={createdAt} />}
 
       {/* Editor content or empty state */}
       <div className="flex-1 overflow-y-auto">
