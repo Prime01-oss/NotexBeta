@@ -95,7 +95,7 @@ function createWindow() {
     // --- FIX: RESTORED preloadScript DECLARATION ---
     const preloadScript = app.isPackaged
         ? path.join(__dirname, '../preload/preload.js') // Production path
-        : path.join(__dirname, 'preload.js');         // Development path
+        : path.join(__dirname, 'preload.js');        // Development path
     // --- END FIX ---
 
     mainWindow = new BrowserWindow({
@@ -367,7 +367,6 @@ function createWindow() {
 }
 
 // --- UPDATED APP READY HANDLER (FIXED CSP) ---
-// --- UPDATED APP READY HANDLER (FIXED CSP) ---
 app.on('ready', () => {
     session.defaultSession.clearCache();
 
@@ -379,8 +378,10 @@ app.on('ready', () => {
                     'Content-Security-Policy': [
                         "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: http://localhost:5173 ws://localhost:5173 https://cdn.tldraw.com https://unpkg.com https://esm.sh; " +
                         "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 https://esm.sh https://unpkg.com; " +
-                        "style-src 'self' 'unsafe-inline' blob: data: https://unpkg.com https://esm.sh; " +
-                        "font-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; " +
+                        // --- START OF FIX ---
+                        "style-src 'self' 'unsafe-inline' blob: data: https://unpkg.com https://esm.sh https://fonts.googleapis.com; " +
+                        "font-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh https://fonts.gstatic.com; " +
+                        // --- END OF FIX ---
                         "img-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; " +
                         "connect-src 'self' http://localhost:5173 ws://localhost:5173 https://cdn.tldraw.com https://unpkg.com https://esm.sh;"
                     ]
@@ -397,8 +398,10 @@ app.on('ready', () => {
                     'Content-Security-Policy': [
                         "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://cdn.tldraw.com https://unpkg.com https://esm.sh; " +
                         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://esm.sh https://unpkg.com; " +
-                        "style-src 'self' 'unsafe-inline' blob: data: https://unpkg.com https://esm.sh; " +
-                        "font-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; " +
+                        // --- START OF FIX ---
+                        "style-src 'self' 'unsafe-inline' blob: data: https://unpkg.com https://esm.sh https://fonts.googleapis.com; " +
+                        "font-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh https://fonts.gstatic.com; " +
+                        // --- END OF FIX ---
                         "img-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; " +
                         "connect-src 'self' https://cdn.tldraw.com https://unpkg.com https://esm.sh;"
                     ]

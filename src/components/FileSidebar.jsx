@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next'; // 1. Import hook
 
 // --- Inline SVG Icons ---
 const icons = {
@@ -18,6 +19,7 @@ const flattenNodes = (nodes) =>
 
 // --- Input Component for Creating Items ---
 function NewItemInput({ parentPath, itemType, onCreate, onCancel, depth = 0 }) {
+  const { t } = useTranslation(); // 2. Initialize hook
   const [name, setName] = useState('');
   const inputRef = React.useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,8 +27,8 @@ function NewItemInput({ parentPath, itemType, onCreate, onCancel, depth = 0 }) {
   useEffect(() => { inputRef.current?.focus(); }, []);
 
   const config = {
-    folder: { icon: icons.folder, color: 'text-yellow-600 dark:text-yellow-500', placeholder: 'New folder name...' },
-    note: { icon: icons.note, color: 'text-blue-600 dark:text-blue-400', placeholder: 'New note name...' },
+    folder: { icon: icons.folder, color: 'text-yellow-600 dark:text-yellow-500', placeholder: t('Folder Name') }, // 3. Use 't'
+    note: { icon: icons.note, color: 'text-blue-600 dark:text-blue-400', placeholder: t('File Name') }, // 3. Use 't'
   }[itemType];
 
   const handleCreate = () => {
@@ -66,7 +68,7 @@ function TreeItem({
   onUpdateTitle,
   onCreateFolder,
   onCreateNote,
-  onDeleteItem,
+  onDeleteItem, // This is the translated wrapper from FileSidebar
   depth = 0,
   checkedIds,
   onCheckChange,
@@ -176,7 +178,7 @@ function TreeItem({
               onUpdateTitle={onUpdateTitle}
               onCreateFolder={onCreateFolder}
               onCreateNote={onCreateNote}
-              onDeleteItem={onDeleteItem}
+              onDeleteItem={onDeleteItem} // Pass wrapper down
               depth={depth + 1}
               checkedIds={checkedIds}
               onCheckChange={onCheckChange}
@@ -212,9 +214,10 @@ export function FileSidebar({
   onCreateNote,
   onCreateFolder,
   onUpdateTitle,
-  onDeleteItem,
-  onDeleteMultipleItems
+  onDeleteItem, // Base function from App.jsx
+  onDeleteMultipleItems // Base function from App.jsx
 }) {
+  const { t } = useTranslation(); // 2. Initialize hook
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteMode, setDeleteMode] = useState(false);
   const [checkedIds, setCheckedIds] = useState(new Set());
@@ -231,13 +234,29 @@ export function FileSidebar({
     });
   };
 
+  // 3. Translated Delete Wrapper (for single item)
+  const handleDeleteItemWrapper = (item) => {
+    if (!item) return;
+    const message = item.type === 'folder'
+      ? t('sidebar.confirmDeleteFolderMessage', { itemTitle: item.title })
+      : t('sidebar.confirmDeleteMessage', { itemTitle: item.title });
+    
+    if (window.confirm(message)) {
+      onDeleteItem(item); // Call base function
+    }
+  };
+
+  // 3. Translated Delete Wrapper (for multiple items)
   const handleBulkDelete = async () => {
     const flat = flattenNodes(notes);
     const items = flat.filter((n) => checkedIds.has(n.id));
     if (items.length === 0) return;
-    await onDeleteMultipleItems(items);
-    setCheckedIds(new Set());
-    setDeleteMode(false);
+
+    if (window.confirm(t('sidebar.confirmDeleteMultiple', { count: items.length }))) {
+      await onDeleteMultipleItems(items); // Call base function
+      setCheckedIds(new Set());
+      setDeleteMode(false);
+    }
   };
 
   return (
@@ -247,7 +266,7 @@ export function FileSidebar({
         <div className="relative flex-1">
           <input
             type="text"
-            placeholder="Search..."
+            placeholder={t('Search Notes')} // 3. Use 't'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 rounded-md text-sm bg-gray-100 dark:bg-zinc-700/50 dark:text-white"
@@ -259,7 +278,7 @@ export function FileSidebar({
         <button
           onClick={() => setDeleteMode(true)}
           disabled={!hasNotes || deleteMode}
-          title="Bulk delete"
+          title={t('sidebar.bulkDeleteTooltip')} // 3. Use 't'
           className={`p-2 rounded-md text-red-600 bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-900 ${deleteMode && 'opacity-50 cursor-not-allowed'}`}
         >
           {icons.trash}
@@ -270,10 +289,10 @@ export function FileSidebar({
       {!deleteMode ? (
         <div className="flex gap-2 mb-4">
           <button onClick={() => setCreatingRoot('note')} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white rounded py-2 text-sm font-semibold shadow">
-            + Note
+            {t('sidebar.newNote')}
           </button>
           <button onClick={() => setCreatingRoot('folder')} className="flex-1 bg-yellow-600 hover:bg-yellow-500 text-white rounded py-2 text-sm font-semibold shadow">
-            + Folder
+            {t('sidebar.newFolder')}
           </button>
         </div>
       ) : (
@@ -282,14 +301,14 @@ export function FileSidebar({
             onClick={() => { setDeleteMode(false); setCheckedIds(new Set()); }}
             className="flex-1 bg-gray-200 dark:bg-zinc-700 py-2 rounded text-sm font-semibold"
           >
-            Cancel
+            {t('cancel')}
           </button>
           <button
             onClick={handleBulkDelete}
             disabled={checkedIds.size === 0}
             className={`flex-1 py-2 rounded text-sm font-semibold text-white shadow ${checkedIds.size > 0 ? 'bg-red-600 hover:bg-red-700' : 'bg-red-400 cursor-not-allowed'}`}
           >
-            Delete {checkedIds.size > 0 ? `(${checkedIds.size})` : ''}
+            {t('sidebar.delete') + (checkedIds.size > 0 ? ` (${checkedIds.size})` : '')}
           </button>
         </div>
       )}
@@ -316,7 +335,7 @@ export function FileSidebar({
             onUpdateTitle={onUpdateTitle}
             onCreateFolder={onCreateFolder}
             onCreateNote={onCreateNote}
-            onDeleteItem={onDeleteItem}
+            onDeleteItem={handleDeleteItemWrapper} // 4. Use translated wrapper
             depth={0}
             checkedIds={checkedIds}
             onCheckChange={handleCheckChange}

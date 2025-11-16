@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next'; // 1. Import hook
 
 // --- SVG ICONS ---
 const icons = {
@@ -53,6 +54,8 @@ const NavButton = ({ icon, label, onClick, isActive, color }) => {
 
 // --- Premium NavigationBar ---
 export function NavigationBar({ activePanel, onPanelClick }) {
+  const { t } = useTranslation(); // 2. Initialize hook
+
   const handleClick = (panel) => {
     onPanelClick(activePanel === panel ? null : panel);
   };
@@ -60,27 +63,27 @@ export function NavigationBar({ activePanel, onPanelClick }) {
   return (
     <div
       className="w-20 flex flex-col justify-between py-4 border-r border-gray-200/60 dark:border-zinc-700/60 
-                 backdrop-blur-md bg-white/60 dark:bg-zinc-900/70 shadow-lg transition-all duration-300"
+                   backdrop-blur-md bg-white/60 dark:bg-zinc-900/70 shadow-lg transition-all duration-300"
     >
       {/* --- Top: Core Panels --- */}
       <div className="flex flex-col items-center space-y-3">
         <NavButton
           icon={icons.file}
-          label="Files"
+          label={t('navbar.files')} // 3. Use 't' function
           onClick={() => handleClick('files')}
           isActive={activePanel === 'files'}
           color="bg-blue-600"
         />
         <NavButton
           icon={icons.pen}
-          label="Draw"
+          label={t('navbar.draw')} // 3. Use 't' function
           onClick={() => handleClick('draw')}
           isActive={activePanel === 'draw'}
           color="bg-purple-600"
         />
         <NavButton
           icon={icons.settings}
-          label="Settings"
+          label={t('navbar.settings')} // 3. Use 't' function
           onClick={() => handleClick('settings')}
           isActive={activePanel === 'settings'}
           color="bg-gray-500"
@@ -92,7 +95,7 @@ export function NavigationBar({ activePanel, onPanelClick }) {
         <div className="w-8 h-px bg-gray-300 dark:bg-zinc-700 my-2"></div>
         <NavButton
           icon={icons.user}
-          label="Profile"
+          label={t('navbar.profile')} // 3. Use 't' function
           onClick={() => handleClick('profile')}
           isActive={activePanel === 'profile'}
           color="bg-blue-500"
