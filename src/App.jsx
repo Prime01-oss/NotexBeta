@@ -1,3 +1,4 @@
+// path: src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next'; // 💡 1. Import i18n hook
 // These imports should now work because you have the component files
@@ -331,6 +332,14 @@ function App() {
         }
     };
 
+    // 💡 NEW: Function to close the editor with auto-save
+    const closeEditor = () => {
+        if (selectedNote && selectedNote.type === 'note') {
+            saveNote(); // Auto-save the current note
+            setSelectedNote(null); // Close the editor space
+        }
+    };
+
     // 💡 THIS IS THE RENAMING FIX (assumes main/preload are fixed)
     const updateItemTitle = (itemToUpdate, newTitle) => {
         if (!newTitle || itemToUpdate.title === newTitle) return;
@@ -476,6 +485,7 @@ function App() {
                         onChange={setCurrentNoteContent}
                         onSave={saveNote}
                         onDelete={selectedNote ? deleteSelectedNote : null}
+                        onClose={closeEditor} // 💡 Pass the close handler
                         isNoteSelected={selectedNote && selectedNote.type === 'note'}
                         selectedNote={selectedNote}
                         language={language}

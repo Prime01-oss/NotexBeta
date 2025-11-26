@@ -117,3 +117,125 @@ html:not(.dark) .bubble-button {
 html:not(.dark) .bubble-button:hover {
   background-color: #F3F4F6; /* gray-100 */
 }
+/* src/index.css */
+
+/* ... (keep your existing scrollbar and heading styles above this) ... */
+
+
+/* ************************************************* */
+/* ** PREMIUM TASK LIST STYLES (FIXED ALIGNMENT)  ** */
+/* ************************************************* */
+ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+
+ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start; /* Align everything to the top */
+  margin-bottom: 0.5rem;
+}
+
+/* 1. CONTAINER: Forces checkbox to match text line-height */
+ul[data-type="taskList"] li > label {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;    /* Vertically centers checkbox in this box */
+  justify-content: center;
+  
+  /* CRITICAL: Must match the editor's line-height (leading-[1.75]) */
+  height: 1.75em;         
+  width: 1.5rem;          
+  margin-right: 0.5rem;
+  user-select: none;
+}
+
+/* 2. TEXT WRAPPER: Removes default 'prose' margins that push text down */
+ul[data-type="taskList"] li > div {
+  flex: 1 1 auto;
+  min-width: 0; 
+}
+
+/* Target the paragraph inside the task item specifically */
+ul[data-type="taskList"] li > div p {
+  margin-top: 0 !important;    /* Force remove top margin */
+  margin-bottom: 0 !important; /* Force remove bottom margin */
+  /* Ensure line-height matches the label height */
+  line-height: 1.75; 
+}
+
+/* 3. THE CHECKBOX ITSELF */
+ul[data-type="taskList"] li > label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  width: 1.2em;   
+  height: 1.2em;
+  border: 2px solid #D1D5DB; /* gray-300 */
+  border-radius: 0.35rem;    
+  background-color: transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: grid;
+  place-content: center;
+  margin: 0; /* Reset margins */
+}
+
+/* Hover Effect */
+ul[data-type="taskList"] li > label input[type="checkbox"]:hover {
+  border-color: #9CA3AF; /* gray-400 */
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Checked State */
+ul[data-type="taskList"] li > label input[type="checkbox"]:checked {
+  background-color: #3B82F6; /* blue-500 */
+  border-color: #3B82F6;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.25); 
+}
+
+/* Checkmark Icon */
+ul[data-type="taskList"] li > label input[type="checkbox"]::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(0) rotate(-45deg);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.5); 
+  box-shadow: inset 1em 1em rgb(229, 229, 229);
+  transform-origin: center;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+/* Completed Text Styling */
+ul[data-type="taskList"] li[data-checked="true"] > div {
+  text-decoration: line-through;
+  text-decoration-color: #D1D5DB;
+  color: #9CA3AF; 
+  opacity: 0.8;
+}
+
+/* --- DARK MODE ADJUSTMENTS --- */
+html.dark ul[data-type="taskList"] li > label input[type="checkbox"] {
+  border-color: #52525B; /* zinc-600 */
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+html.dark ul[data-type="taskList"] li > label input[type="checkbox"]:hover {
+  border-color: #71717A; /* zinc-500 */
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+html.dark ul[data-type="taskList"] li > label input[type="checkbox"]:checked {
+  background-color: #3B82F6; /* blue-500 */
+  border-color: #3B82F6;
+  box-shadow: 0 4px 10px -2px rgba(59, 130, 246, 0.5); 
+}
+
+html.dark ul[data-type="taskList"] li[data-checked="true"] > div {
+  color: #52525B; /* zinc-600 */
+  text-decoration-color: #3F3F46; /* zinc-700 */
+}

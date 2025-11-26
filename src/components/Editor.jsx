@@ -5,6 +5,8 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextStyle from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
 
 /* =========================
    Icons (merged & consistent)
@@ -29,6 +31,16 @@ const icons = {
       <line x1="4" y1="21" x2="20" y2="21" />
     </svg>
   ),
+  // 💡 NEW CLEANER ICON
+  checklist: (
+    <svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="5" width="6" height="6" rx="1" />
+      <path d="m3 17 2 2 4-4" />
+      <path d="M13 6h8" />
+      <path d="M13 12h8" />
+      <path d="M13 18h8" />
+    </svg>
+  ),
   trash: (
     <svg width="1em" height="1em" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="3 6 5 6 21 6" />
@@ -38,6 +50,12 @@ const icons = {
   check: (
     <svg width="1em" height="1em" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="20 6 9 17 4 12" />
+    </svg>
+  ),
+  close: (
+    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
     </svg>
   ),
   file: (
@@ -51,7 +69,7 @@ const icons = {
 /* =========================
    MenuBar component
    ========================= */
-const MenuBar = ({ editor, onSave, onDelete, isNoteSelected, createdAt }) => {
+const MenuBar = ({ editor, onSave, onDelete, onClose, isNoteSelected, createdAt }) => {
   if (!editor) return null;
 
   const fontOptions = [
@@ -104,7 +122,7 @@ const MenuBar = ({ editor, onSave, onDelete, isNoteSelected, createdAt }) => {
           className={selectClass + ' min-w-[150px]'}
           defaultValue="sans-serif"
           onChange={(e) => {
-            const val = e.target.value;
+             const val = e.target.value;
             if (val === 'sans-serif') {
               editor.chain().focus().unsetFontFamily?.().run?.();
             } else {
@@ -130,6 +148,19 @@ const MenuBar = ({ editor, onSave, onDelete, isNoteSelected, createdAt }) => {
         <button title="Underline (Ctrl+U)" onClick={() => editor.chain().focus().toggleUnderline().run()} className={btnClass(editor.isActive('underline'))}>
           {icons.underline}
         </button>
+
+        {/* 💡 1. ADDED DIVIDER HERE */}
+        <div className="w-px h-6 bg-gray-300 dark:bg-zinc-700 mx-1" />
+
+        {/* 💡 2. UPDATED CHECKLIST BUTTON */}
+        <button 
+          title="Checklist" 
+          onClick={() => editor.chain().focus().toggleTaskList().run()} 
+          className={btnClass(editor.isActive('taskList'))}
+        >
+          {icons.checklist}
+        </button>
+
       </div>
 
       {/* Right controls */}
@@ -155,7 +186,6 @@ const MenuBar = ({ editor, onSave, onDelete, isNoteSelected, createdAt }) => {
             >
               <span className="sr-only">Delete</span>
               {icons.trash}
-              {/* <span className="hidden md:inline text-sm font-medium"></span> */}
             </button>
 
             <button
@@ -165,12 +195,20 @@ const MenuBar = ({ editor, onSave, onDelete, isNoteSelected, createdAt }) => {
             >
               <span className="sr-only">Save</span>
               {icons.check}
-              {/* <span className="hidden md:inline text-sm font-medium">Save</span> */}
+            </button>
+            
+            <button
+              onClick={onClose}
+              title="Close editor"
+              className="flex items-center gap-2 px-3 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-zinc-700/50 transition-colors text-gray-600 dark:text-gray-300"
+            >
+              <span className="sr-only">Close</span>
+              {icons.close}
             </button>
           </div>
         </div>
       ) : (
-        <div /> /* keep spacing when nothing is selected */
+        <div /> 
       )}
     </div>
   );
@@ -179,8 +217,7 @@ const MenuBar = ({ editor, onSave, onDelete, isNoteSelected, createdAt }) => {
 /* =========================
    Editor component
    ========================= */
-export function Editor({ content, onChange, onSave, onDelete, isNoteSelected, selectedNote }) {
-  // Formatted createdAt (human readable)
+export function Editor({ content, onChange, onSave, onDelete, onClose, isNoteSelected, selectedNote }) {
   const [createdAt, setCreatedAt] = useState(null);
 
   useEffect(() => {
@@ -205,11 +242,9 @@ export function Editor({ content, onChange, onSave, onDelete, isNoteSelected, se
       extensions: [
         StarterKit,
         Underline,
-        // TextStyle must come before FontFamily so FontFamily applies to textStyle nodes
         TextStyle,
         FontFamily.configure({
           types: ['textStyle'],
-          // fonts listed here correspond to select options values
           fonts: [
             'sans-serif',
             'serif',
@@ -221,6 +256,10 @@ export function Editor({ content, onChange, onSave, onDelete, isNoteSelected, se
             'Verdana, sans-serif',
             '"Comic Sans MS", cursive, sans-serif',
           ],
+        }),
+        TaskList,
+        TaskItem.configure({
+          nested: true, 
         }),
       ],
       content: typeof content === 'string' ? content : '',
@@ -235,26 +274,21 @@ export function Editor({ content, onChange, onSave, onDelete, isNoteSelected, se
         },
       },
     },
-    // Recreate editor when isNoteSelected changes (makes editable toggle reliable)
     [isNoteSelected]
   );
 
-  // Sync external content into editor if it changed externally
   useEffect(() => {
     if (editor && isNoteSelected && typeof content === 'string' && content !== editor.getHTML()) {
-      // false => do not emit update transaction to avoid cycles
       editor.commands.setContent(content || '', false, { preserveCursor: false });
     }
   }, [content, isNoteSelected, editor]);
 
-  // Keyboard shortcuts: optional — ensure default tiptap keys still work
   const renderEmptyState = useCallback(() => {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <div className="text-center px-6 -translate-x-9">
           <p className="text-xl font-light text-gray-500 dark:text-gray-400 mb-2">
             <span className="inline-flex items-center gap-2 justify-center">
-             
               <span className="font-semibold">Select a note from</span>
                {icons.file}
               <span className="font-semibold">Files</span>
@@ -268,10 +302,8 @@ export function Editor({ content, onChange, onSave, onDelete, isNoteSelected, se
 
   return (
     <div className="flex-1 flex flex-col bg-white dark:bg-zinc-900 relative min-h-[320px]">
-      {/* Menu bar */}
-      {editor && isNoteSelected && <MenuBar editor={editor} onSave={onSave} onDelete={onDelete} isNoteSelected={isNoteSelected} createdAt={createdAt} />}
+      {editor && isNoteSelected && <MenuBar editor={editor} onSave={onSave} onDelete={onDelete} onClose={onClose} isNoteSelected={isNoteSelected} createdAt={createdAt} />}
 
-      {/* Editor content or empty state */}
       <div className="flex-1 overflow-y-auto">
         <div className="w-full h-full">
           {isNoteSelected && editor ? (
