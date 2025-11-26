@@ -251,7 +251,7 @@ export function Editor({ content, onChange, onSave, onDelete, isNoteSelected, se
   const renderEmptyState = useCallback(() => {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="text-center px-6">
+        <div className="text-center px-6 -translate-x-9">
           <p className="text-xl font-light text-gray-500 dark:text-gray-400 mb-2">
             <span className="inline-flex items-center gap-2 justify-center">
              

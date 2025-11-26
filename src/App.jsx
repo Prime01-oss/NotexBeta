@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next'; // 💡 1. Import i18n hook
 // These imports should now work because you have the component files
-import { FileSidebar } from './components/FileSidebar'; 
+import LogoIcon from '../src/Icons/notex.png';
+
+import { FileSidebar } from './components/FileSidebar';
 import { Editor } from './components/Editor';
 import { WindowControls } from './components/WindowControl';
 import { NavigationBar } from './components/NavigationBar';
@@ -26,11 +28,11 @@ const findNodeById = (nodes, id) => {
 
 function App() {
     // notes is now a nested array (the tree structure)
-    const [notes, setNotes] = useState([]); 
+    const [notes, setNotes] = useState([]);
     // selectedNote stores the full object: { id, title, type, path, children? }
-    const [selectedNote, setSelectedNote] = useState(null); 
+    const [selectedNote, setSelectedNote] = useState(null);
     const [currentNoteContent, setCurrentNoteContent] = useState('');
-    
+
     // 💡 1. ADD A LOADING STATE
     const [isSettingsLoading, setIsSettingsLoading] = useState(true);
 
@@ -74,7 +76,7 @@ function App() {
             language,
             timeZone
         };
-        
+
         // This is a "fire-and-forget" save
         window.electronAPI.saveSettings(settingsToSave);
 
@@ -86,13 +88,13 @@ function App() {
         // Only load content if the selected item is a 'note'
         if (selectedNote && selectedNote.type === 'note') {
             // Use the note's path to fetch content
-            window.electronAPI.getNoteContent(selectedNote.path) 
+            window.electronAPI.getNoteContent(selectedNote.path)
                 .then(content => setCurrentNoteContent(content || ''));
         } else {
             setCurrentNoteContent(''); // Clear editor for folders or nothing selected
         }
     }, [selectedNote]);
-    
+
     // This effect manages the 'dark' class on the <html> tag
     useEffect(() => {
         const root = window.document.documentElement;
@@ -106,24 +108,24 @@ function App() {
     // 💡 2. ADD FONT EFFECT (This is the fixed version)
     useEffect(() => {
         const root = window.document.documentElement;
-        
+
         // 1. List of ALL possible font classes from your settings
         const fontClasses = [
-          'font-sans', 'font-serif', 'font-monospace', 'font-comic-sans-ms',
-          'font-arial', 'font-georgia', 'font-courier-new', 
-          'font-times-new-roman', 'font-verdana'
+            'font-sans', 'font-serif', 'font-monospace', 'font-comic-sans-ms',
+            'font-arial', 'font-georgia', 'font-courier-new',
+            'font-times-new-roman', 'font-verdana'
         ];
-        
+
         // 2. Remove all of them to prevent conflicts
         root.classList.remove(...fontClasses);
-        
+
         // 3. Add the correct class based on the state
         if (notebookFont) {
-          root.classList.add(`font-${notebookFont}`);
+            root.classList.add(`font-${notebookFont}`);
         } else {
-          root.classList.add('font-sans'); // Fallback to default
+            root.classList.add('font-sans'); // Fallback to default
         }
-        
+
     }, [notebookFont]); // Re-run this effect whenever 'notebookFont' changes
 
     // 💡 3. ADD LANGUAGE EFFECT
@@ -139,13 +141,13 @@ function App() {
         // Fetches the entire nested structure
         return window.electronAPI.getNotesList().then(newNotes => {
             setNotes(newNotes);
-            
+
             // Re-select the previously selected item if it still exists in the new tree
             if (selectedNote) {
                 const reSelectedNote = findNodeById(newNotes, selectedNote.id);
                 if (reSelectedNote) {
                     // Important: Update selectedNote with the new object reference/paths
-                    setSelectedNote(reSelectedNote); 
+                    setSelectedNote(reSelectedNote);
                 } else {
                     setSelectedNote(null);
                 }
@@ -159,14 +161,14 @@ function App() {
         // Check if a note is currently selected, it's a 'note' (not a folder),
         // and the new item being selected is *different* from the current one.
         if (selectedNote && selectedNote.type === 'note' && selectedNote.id !== item?.id) {
-            
+
             // This is a "fire-and-forget" save. It uses the *current* note's
             // info (selectedNote) and the *current* editor content (currentNoteContent)
             // right before we switch to the new note.
-            window.electronAPI.saveNoteContent({ 
-                id: selectedNote.id, 
-                path: selectedNote.path, 
-                content: currentNoteContent 
+            window.electronAPI.saveNoteContent({
+                id: selectedNote.id,
+                path: selectedNote.path,
+                content: currentNoteContent
             });
         }
         // --- END AUTO-SAVE LOGIC ---
@@ -175,7 +177,7 @@ function App() {
         // load the new note's content.
         setSelectedNote(item);
     };
-    
+
     // --- Note/Folder Actions (FIXED ASYNC) ---
 
     // Accepts a third argument, `onComplete`, from the Sidebar/NewFolderInput.
@@ -187,12 +189,12 @@ function App() {
                     // Assuming the Main Process returns { success: boolean, error?: string }
                     if (result && result.success) {
                         // 2. ONLY if successful, reload the list (which returns a Promise)
-                        return loadNotesList(); 
+                        return loadNotesList();
                     } else {
                         // Handle Main Process error (e.g., Folder already exists)
                         alert(`Creation Failed: ${result ? result.error : 'Unknown error'}`);
                         // 3. Close the input box even on failure
-                        if (onComplete) onComplete(); 
+                        if (onComplete) onComplete();
                         // Stop the promise chain here
                         throw new Error('Folder creation failed in Main Process.');
                     }
@@ -213,10 +215,10 @@ function App() {
                 });
         } else {
             // If name is empty, close the input immediately
-            if (onComplete) onComplete(); 
+            if (onComplete) onComplete();
         }
     };
-    
+
     // The prop now expects the new 3-argument signature.
     const createFolder = handleFolderCreation;
 
@@ -224,7 +226,7 @@ function App() {
     // 💡 UPDATED to match the new API and be consistent with folder creation
     // This no longer uses prompt()
     const createNote = (parentPath, noteTitle, onComplete) => {
-        
+
         // 1. The title is now passed in, so we just check it.
         if (!noteTitle || noteTitle.trim() === '') {
             if (onComplete) onComplete(); // Call the onCancel callback
@@ -234,15 +236,15 @@ function App() {
         // 2. Call the API with the title from the sidebar
         window.electronAPI.createNote(parentPath, noteTitle)
             .then(result => {
-                
+
                 // 3. Check the new success object
                 if (result && result.success) {
-                    
+
                     // 4. Reload the list, which returns its own promise
                     return loadNotesList().then((newlyLoadedTree) => { // Use the returned tree
                         // After the list is reloaded, select the new note
                         const newNoteInTree = findNodeById(newlyLoadedTree, result.newNode.id); // Use fresh tree
-                        setSelectedNote(newNoteInTree || result.newNode); 
+                        setSelectedNote(newNoteInTree || result.newNode);
                     });
 
                 } else {
@@ -271,13 +273,13 @@ function App() {
 
         // Confirmation logic is now in FileSidebar.jsx
         window.electronAPI.deleteNote(itemToDelete.path, itemToDelete.type);
-        
+
         if (selectedNote && selectedNote.id === itemToDelete.id) {
             setSelectedNote(null);
         }
         loadNotesList();
     };
-    
+
     // 💡 NEW: Bulk delete function for the sidebar
     const deleteMultipleItems = async (items) => {
         if (!items || items.length === 0) return;
@@ -305,10 +307,10 @@ function App() {
     // 💡 RENAMED: This is the old deleteItem, now used by the Editor
     const deleteSelectedNote = () => {
         if (selectedNote) {
-             // We can use the base deleteItem, but it's better
-             // to have the Editor's delete logic be self-contained
-             // or use a translated confirmation here too.
-             // For now, let's keep the original logic for the Editor button:
+            // We can use the base deleteItem, but it's better
+            // to have the Editor's delete logic be self-contained
+            // or use a translated confirmation here too.
+            // For now, let's keep the original logic for the Editor button:
             if (selectedNote.type === 'folder' && !confirm(`Are you sure you want to delete the folder "${selectedNote.title}" and all its contents?`)) {
                 return;
             }
@@ -321,10 +323,10 @@ function App() {
 
     const saveNote = () => {
         if (selectedNote && selectedNote.type === 'note') {
-            window.electronAPI.saveNoteContent({ 
-                id: selectedNote.id, 
-                path: selectedNote.path, 
-                content: currentNoteContent 
+            window.electronAPI.saveNoteContent({
+                id: selectedNote.id,
+                path: selectedNote.path,
+                content: currentNoteContent
             });
         }
     };
@@ -332,14 +334,14 @@ function App() {
     // 💡 THIS IS THE RENAMING FIX (assumes main/preload are fixed)
     const updateItemTitle = (itemToUpdate, newTitle) => {
         if (!newTitle || itemToUpdate.title === newTitle) return;
-        
-        const updateData = { 
-            id: itemToUpdate.id, 
-            path: itemToUpdate.path, 
-            newTitle, 
-            type: itemToUpdate.type 
+
+        const updateData = {
+            id: itemToUpdate.id,
+            path: itemToUpdate.path,
+            newTitle,
+            type: itemToUpdate.type
         };
-        
+
         window.electronAPI.updateNoteTitle(updateData)
             .then(() => {
                 if (selectedNote && selectedNote.id === itemToUpdate.id) {
@@ -357,35 +359,62 @@ function App() {
     return (
         // Root Div for light/dark mode
         <div className="flex flex-col h-screen relative bg-gray-100 text-gray-900 dark:bg-zinc-900 dark:text-white">
-            
-           {/* Header */}
-            <header className="titlebar flex justify-between items-center p-3 pl-4 
+
+            {/* Header */}
+            <header className="titlebar flex justify-between items-center px-3 py-1.5 
                         bg-gray-200/80 border-b border-gray-300/50 
-                        dark:bg-zinc-800/80 dark:border-zinc-700/50">
-                
+                        dark:bg-zinc-800/80 dark:border-zinc-700/50 h-10">
+
                 {/* Left: App Title (flex-1 ensures equal spacing with right side) */}
                 <div className="flex-1 flex justify-start">
-                    <h1 className="text-xl font-extrabold text-blue-600 dark:text-blue-400 tracking-wider">Notex</h1>
+                    <div className="flex items-center">
+                        <img
+                            src={LogoIcon}
+                            alt="Notex Icon"
+                            // 1. Changed h-10 to h-6 to fit the new compact height
+                            // 2. Changed w-30 to w-auto to prevent stretching
+                            className="h-8 w-auto select-none pointer-events-none"
+                        />
+
+                    </div>
+
                 </div>
 
                 {/* Center: Active Note Title - Perfect Center & Premium Look */}
                 {/* Center: Active Note Title - Perfect Center & Premium Look with Shaded Background */}
+                {/* Center: Active Note Title - Perfect Center & Premium Look */}
                 <div className="flex-shrink-0 max-w-[50%] text-center truncate 
-                                text-lg tracking-wide 
+                                text-sm tracking-wide 
                                 bg-gray-100 dark:bg-zinc-700/70 
-                                px-4 py-2 rounded-lg shadow-md 
+                                px-3 py-0.5 rounded-md shadow-sm 
                                 titlebar-drag cursor-default">
-                    {/* Display title with premium styling if a note is selected */}
-                    {selectedNote && selectedNote.type === 'note' 
-                        ? <span className="font-extrabold text-blue-700 dark:text-blue-300">
-                              {selectedNote.title}
-                          </span>
-                        : <span className="text-gray-500 dark:text-gray-400 font-medium">
-                              Welcome to Notex
-                          </span>}
-                
+
+                    {/* 1. PRIORITY CHECK: Are we in Drawing Mode? */}
+                    {activePanel === 'draw' ? (
+                        <span className="font-extrabold text-purple-600 dark:text-purple-400">
+                            Canvas
+                        </span>
+                    ) :
+                    // activePanel === 'settings' ? (
+                    //     <span className="font-extrabold text-gray-300 dark:text-gray-200">
+                    //         Settings
+                    //     </span>
+                    // ) :
+
+                        /* 2. If not, is a note selected? */
+                        selectedNote && selectedNote.type === 'note' ? (
+                            <span className="font-extrabold text-blue-600 dark:text-blue-400">
+                                {selectedNote.title}
+                            </span>
+                        ) : (
+                            /* 3. Default state */
+                            <span className="text-gray-500 dark:text-gray-400 font-medium">
+                                Welcome to Notex
+                            </span>
+                        )}
+
                 </div>
-                
+
                 {/* Right: Window Controls (flex-1 ensures equal spacing with left side) */}
                 <div className="flex-1 flex justify-end">
                     <WindowControls />
@@ -394,19 +423,19 @@ function App() {
 
             {/* Main Content Area */}
             <main className="flex flex-1 overflow-hidden">
-                
+
                 {/* Navigation Bar (Fixed Left) */}
-                <NavigationBar 
+                <NavigationBar
                     activePanel={activePanel}
                     onPanelClick={setActivePanel} // Pass the setter to toggle panels
                 />
-                
+
                 {/* Conditional Side Panels: Container manages opening/closing animation */}
                 <div className={`
                         flex-shrink-0 transition-all duration-300 ease-in-out
                         ${activePanel === 'files' || activePanel === 'settings' ? 'w-1/3 max-w-xs' : 'w-0 overflow-hidden'}
                         `}>
-                    
+
                     {/* File Sidebar */}
                     {activePanel === 'files' && (
                         <FileSidebar
@@ -414,16 +443,16 @@ function App() {
                             selectedNote={selectedNote}
                             onItemSelect={handleItemSelect}
                             onCreateNote={createNote}
-                            onCreateFolder={createFolder} 
+                            onCreateFolder={createFolder}
                             onUpdateTitle={updateItemTitle}
                             onDeleteItem={deleteItem} // Pass the base delete function
                             onDeleteMultipleItems={deleteMultipleItems} // Pass the base multi-delete
                         />
                     )}
-                    
+
                     {/* 💡 3. PASS ALL SETTINGS PROPS TO SETTINGS PANEL */}
                     {activePanel === 'settings' && (
-                        <SettingsPanel 
+                        <SettingsPanel
                             theme={theme}
                             setTheme={setTheme}
                             notebookFont={notebookFont}
@@ -434,9 +463,9 @@ function App() {
                             setCountry={setTimeZone} // Tie 'setCountry' prop to 'setTimeZone' state
                         />
                     )}
-                    
+
                 </div>
-                
+
                 {/* 💡 2. Main Content: Editor OR Drawing Space */}
                 {activePanel === 'draw' ? (
                     <DrawingSpace />
@@ -448,7 +477,7 @@ function App() {
                         onSave={saveNote}
                         onDelete={selectedNote ? deleteSelectedNote : null}
                         isNoteSelected={selectedNote && selectedNote.type === 'note'}
-                        selectedNote={selectedNote} 
+                        selectedNote={selectedNote}
                         language={language}
                         timeZone={timeZone}
                     />
@@ -456,9 +485,9 @@ function App() {
             </main>
 
             {/* RENDER THE PROFILE PANEL HERE (outside 'main') */}
-            {activePanel === 'profile' && <ProfilePanel 
-                                            onClose={() => setActivePanel(null)} 
-                                           />}
+            {activePanel === 'profile' && <ProfilePanel
+                onClose={() => setActivePanel(null)}
+            />}
         </div>
     );
 }

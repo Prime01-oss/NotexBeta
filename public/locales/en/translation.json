@@ -12,7 +12,7 @@
   },
   "navbar": {
     "files": "Files",
-    "draw": "Drawing Space",
+    "draw": "Canvas",
     "search": "Search",
     "settings": "Settings",
     "profile": "Profile"
@@ -41,7 +41,7 @@
     "signOut": "Sign Out"
   },
   "draw": {
-    "title": "Drawing Space",
+    "title": "Canvas",
     "beta": "(Beta)"
   }
 }

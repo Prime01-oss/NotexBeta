@@ -83,6 +83,7 @@ function createWindow() {
     height: 1650,
     minWidth: 800,
     minHeight: 600,
+    // icon: getIconPath(),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -95,6 +96,12 @@ function createWindow() {
     vibrancy: "ultra-dark",
     backgroundColor: "#00000000",
     show: false
+  });
+  mainWindow.on("maximize", () => {
+    mainWindow.webContents.send("window-maximized");
+  });
+  mainWindow.on("unmaximize", () => {
+    mainWindow.webContents.send("window-unmaximized");
   });
   const devServerURL = "http://localhost:5173";
   if (!app.isPackaged) {
@@ -283,7 +290,7 @@ app.on("ready", () => {
         responseHeaders: {
           ...details.responseHeaders,
           "Content-Security-Policy": [
-            "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: http://localhost:5173 ws://localhost:5173 https://cdn.tldraw.com https://unpkg.com https://esm.sh; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' blob: data: https://unpkg.com https://esm.sh https://fonts.googleapis.com; font-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh https://fonts.gstatic.com; img-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; connect-src 'self' http://localhost:5173 ws://localhost:5173 https://cdn.tldraw.com https://unpkg.com https://esm.sh;"
+            "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: http://localhost:5173 ws://localhost:5173 https://cdn.tldraw.com https://unpkg.com https://esm.sh; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' blob: data: https://unpkg.com https://esm.sh https://fonts.googleapis.com; font-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh https://fonts.gstatic.com; img-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; connect-src 'self' http://localhost:5173 ws://localhost:5173 https://cdn.tldraw.com https://unpkg.com https://esm.sh;frame-src 'self' https://www.youtube.com https://youtube.com;"
           ]
         }
       });
@@ -294,7 +301,7 @@ app.on("ready", () => {
         responseHeaders: {
           ...details.responseHeaders,
           "Content-Security-Policy": [
-            "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://cdn.tldraw.com https://unpkg.com https://esm.sh; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' blob: data: https://unpkg.com https://esm.sh https://fonts.googleapis.com; font-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh https://fonts.gstatic.com; img-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; connect-src 'self' https://cdn.tldraw.com https://unpkg.com https://esm.sh;"
+            "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://cdn.tldraw.com https://unpkg.com https://esm.sh; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' blob: data: https://unpkg.com https://esm.sh https://fonts.googleapis.com; font-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh https://fonts.gstatic.com; img-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; connect-src 'self' https://cdn.tldraw.com https://unpkg.com https://esm.sh;frame-src 'self' https://www.youtube.com https://youtube.com;"
           ]
         }
       });

@@ -103,6 +103,7 @@ function createWindow() {
         height: 1650,
         minWidth: 800,
         minHeight: 600,
+        // icon: getIconPath(),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -115,6 +116,13 @@ function createWindow() {
         vibrancy: 'ultra-dark',
         backgroundColor: '#00000000',
         show: false
+    });
+    mainWindow.on('maximize', () => {
+        mainWindow.webContents.send('window-maximized');
+    });
+
+    mainWindow.on('unmaximize', () => {
+        mainWindow.webContents.send('window-unmaximized');
     });
 
     // --- UPDATED LOADING LOGIC (THE FIX) ---
@@ -151,6 +159,8 @@ function createWindow() {
             mainWindow.close();
         }
     });
+
+    
     ipcMain.on('minimize-window', () => {
         if (mainWindow) {
             mainWindow.minimize();
@@ -383,7 +393,8 @@ app.on('ready', () => {
                         "font-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh https://fonts.gstatic.com; " +
                         // --- END OF FIX ---
                         "img-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; " +
-                        "connect-src 'self' http://localhost:5173 ws://localhost:5173 https://cdn.tldraw.com https://unpkg.com https://esm.sh;"
+                        "connect-src 'self' http://localhost:5173 ws://localhost:5173 https://cdn.tldraw.com https://unpkg.com https://esm.sh;" +
+                        "frame-src 'self' https://www.youtube.com https://youtube.com;"
                     ]
                 }
             });
@@ -403,7 +414,8 @@ app.on('ready', () => {
                         "font-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh https://fonts.gstatic.com; " +
                         // --- END OF FIX ---
                         "img-src 'self' data: blob: https://cdn.tldraw.com https://unpkg.com https://esm.sh; " +
-                        "connect-src 'self' https://cdn.tldraw.com https://unpkg.com https://esm.sh;"
+                        "connect-src 'self' https://cdn.tldraw.com https://unpkg.com https://esm.sh;" +
+                        "frame-src 'self' https://www.youtube.com https://youtube.com;"
                     ]
                 }
             });

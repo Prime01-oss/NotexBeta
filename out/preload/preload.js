@@ -1,10 +1,23 @@
 "use strict";
 const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("electronAPI", {
-  // --- Window Controls (Unchanged) ---
+  // ... (existing controls: close, minimize, etc.)
   closeWindow: () => ipcRenderer.send("close-window"),
   minimizeWindow: () => ipcRenderer.send("minimize-window"),
   maximizeWindow: () => ipcRenderer.send("maximize-window"),
+  // --- NEW: Maximize State Sync ---
+  checkMaximized: () => ipcRenderer.invoke("is-maximized"),
+  // This allows us to listen for events and clean them up automatically
+  onWindowMaximized: (callback) => {
+    const subscription = (event, ...args) => callback(...args);
+    ipcRenderer.on("window-maximized", subscription);
+    return () => ipcRenderer.removeListener("window-maximized", subscription);
+  },
+  onWindowUnmaximized: (callback) => {
+    const subscription = (event, ...args) => callback(...args);
+    ipcRenderer.on("window-unmaximized", subscription);
+    return () => ipcRenderer.removeListener("window-unmaximized", subscription);
+  },
   // --- UPDATED Notes Functions for Tree Structure ---
   getNotesList: () => ipcRenderer.invoke("get-notes-list"),
   // Fetches the nested tree
